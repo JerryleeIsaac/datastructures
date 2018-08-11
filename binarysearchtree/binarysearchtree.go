@@ -8,6 +8,7 @@ type BinarySearchTree interface {
 	Parent() BinarySearchTree
 	SetLeftChild(BinarySearchTree)
 	SetRightChild(BinarySearchTree)
+	SetParent(BinarySearchTree)
 	SetElement(e Element)
 	GetElement() Element
 }
@@ -18,91 +19,118 @@ type Element interface {
 	Value() int
 }
 
-// Insert adds an element to a binary search tree
-func Insert(b BinarySearchTree, e Element) {
-	if b == nil {
-		return
-	}
-	if b.Value() >= e.Value() {
-		if b.LeftChild() == nil {
-			b.LeftChild().SetElement(e)
-		} else {
-			Insert(b.LeftChild(), e)
-		}
-	} else {
-		if b.RightChild() == nil {
-			b.RightChild().SetElement(e)
-		} else {
-			Insert(b.RightChild(), e)
-		}
+// Insert adds a new node to a binary search tree
+func Insert(root BinarySearchTree, newNode BinarySearchTree) BinarySearchTree {
+	// Create new node if root is nil
+	//
+	if root == nil {
+		return newNode
 	}
 
+	// Insert on left or right subtree depending on the value of the new node
+	//
+	if root.Value() >= newNode.Value() {
+		root.SetLeftChild(Insert(root.LeftChild(), newNode))
+		root.LeftChild().SetParent(newNode)
+	} else {
+		root.SetRightChild(Insert(root.RightChild(), newNode))
+		root.RightChild().SetParent(newNode)
+	}
+	return root
 }
 
-// Find looks for the element in the binary search tree
-func Find(b BinarySearchTree, e Element) (Element, bool) {
-	if b == nil {
+// Find looks for the node containing the element in the binary search tree
+func Find(root BinarySearchTree, node BinarySearchTree) (BinarySearchTree, bool) {
+	if root == nil {
 		return nil, false
 	}
-	if b.Value() > e.Value() {
-		return Find(b.LeftChild(), e)
+
+	// Look for the element on the left or right subtree depending on the value of the
+	// node we are looking for
+	//
+	if root.Value() > node.Value() {
+		return Find(root.LeftChild(), node)
 	}
-	if b.Value() < e.Value() {
-		return Find(b.RightChild(), e)
+	if root.Value() < node.Value() {
+		return Find(root.RightChild(), node)
 	}
-	return b.GetElement(), true
+	return root, true
 }
 
 // Remove deletes an element on a binary search tree
-func Remove(b BinarySearchTree, e Element) (Element, bool) {
-	if b == nil {
+func Remove(root BinarySearchTree, node BinarySearchTree) (BinarySearchTree, bool) {
+	if root == nil {
 		return nil, false
 	}
-	if b.Value() > e.Value() {
-		return Remove(b.LeftChild(), e)
+
+	// Recursively look for the node to be deleted by following the pattern for find
+	//
+	if root.Value() > node.Value() {
+		return Remove(root.LeftChild(), node)
 	}
-	if b.Value() < e.Value() {
-		return Remove(b.RightChild(), e)
+	if root.Value() < node.Value() {
+		return Remove(root.RightChild(), node)
 	}
 
-	var node BinarySearchTree
-	var elem Element
-	if b.LeftChild() != nil && b.LeftChild().Value() == e.Value() {
-		node = b.LeftChild()
-		elem = node.GetElement()
-		if node.LeftChild() == nil && node.RightChild() == nil {
-			b.SetLeftChild(nil)
-		} else if node.LeftChild() != nil && node.RightChild() != nil {
-			del := node.RightChild()
+	var temp BinarySearchTree
+	if root.LeftChild() != nil && root.LeftChild().Value() == node.Value() {
+		// Case A: Node to be deleted is on the left child
+		//
+		temp = root.LeftChild()
+		if temp.LeftChild() == nil && temp.RightChild() == nil {
+			// Case A1: Node to be deleted has no children
+			//
+			root.SetLeftChild(nil)
+		} else if temp.LeftChild() != nil && temp.RightChild() != nil {
+			// Case A2: Node to be deleted has two children
+			//
+			del := temp.RightChild()
 			for del.RightChild() != nil {
 				del = del.RightChild()
 			}
 			del.Parent().SetRightChild(nil)
-			node.SetElement(del.GetElement())
-		} else if node.LeftChild() != nil {
-			b.SetLeftChild(node.LeftChild())
-		} else if node.RightChild() != nil {
-			b.SetLeftChild(node.RightChild())
+			temp.SetElement(del.GetElement())
+		} else {
+			// Case A3: Node to be deleted has only one children
+			//
+			if temp.LeftChild() != nil {
+				root.SetLeftChild(temp.LeftChild())
+				temp.LeftChild().SetParent(root)
+			} else if temp.RightChild() != nil {
+				root.SetLeftChild(temp.RightChild())
+				temp.RightChild().SetParent(root)
+			}
 		}
-	} else if b.RightChild() != nil && b.RightChild().Value() == e.Value() {
-		node = b.RightChild()
-		elem = node.GetElement()
-		if node.LeftChild() == nil && node.RightChild() == nil {
-			b.SetRightChild(nil)
-		} else if node.LeftChild() != nil && node.RightChild() != nil {
-			del := node.LeftChild()
+	} else if root.RightChild() != nil && root.RightChild().Value() == node.Value() {
+		// Case B: Node to be deleted is on the right child
+		//
+		temp = root.RightChild()
+		if temp.LeftChild() == nil && temp.RightChild() == nil {
+			// Case B1: Node to be deleted has no children
+			//
+			root.SetRightChild(nil)
+		} else if temp.LeftChild() != nil && temp.RightChild() != nil {
+			// Case B2: Node to be deleted has two children
+			//
+			del := temp.LeftChild()
 			for del.LeftChild() != nil {
 				del = del.LeftChild()
 			}
 			del.Parent().SetLeftChild(nil)
-			node.SetElement(del.GetElement())
-		} else if node.LeftChild() != nil {
-			b.SetRightChild(node.LeftChild())
-		} else if node.RightChild() != nil {
-			b.SetRightChild(node.LeftChild())
+			temp.SetElement(del.GetElement())
+		} else {
+			// Case B3: Node to be deleted has only one children
+			//
+			if temp.LeftChild() != nil {
+				root.SetRightChild(temp.LeftChild())
+				temp.LeftChild().SetParent(root)
+			} else if temp.RightChild() != nil {
+				root.SetRightChild(temp.RightChild())
+				temp.RightChild().SetParent(root)
+			}
 		}
 	}
-	return elem, true
+	return temp, true
 }
 
 func leftRotate(b BinarySearchTree) BinarySearchTree {
