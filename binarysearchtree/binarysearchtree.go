@@ -6,6 +6,10 @@ type Node struct {
 	LeftChild  *Node
 	RightChild *Node
 	Parent     *Node
+
+	Height int
+	// Red Black Tree node properties
+	color int
 }
 
 // Element is an element stored in a node of a binary search tree
@@ -31,6 +35,7 @@ func Insert(root *Node, newNode *Node) *Node {
 		root.RightChild = Insert(root.RightChild, newNode)
 		root.RightChild.Parent = root
 	}
+	root.Height = max(height(root.LeftChild), height(root.RightChild)) + 1
 	return root
 }
 
@@ -125,35 +130,48 @@ func Remove(root *Node, node *Node) (*Node, bool) {
 			}
 		}
 	}
+	root.Height = max(height(root.LeftChild), height(root.RightChild)) + 1
 	return temp, true
 }
 
 // LeftRotate rotates a node in a binary search tree
-//
-func LeftRotate(b *Node) *Node {
-	x := b.RightChild
-	z := x.LeftChild
+func LeftRotate(node *Node) *Node {
+	right := node.RightChild
+	rightLeft := right.LeftChild
 
-	x.LeftChild = b
-	b.Parent = x
+	right.LeftChild = node
+	node.Parent = right
 
-	b.RightChild = z
-	z.Parent = b
+	node.RightChild = rightLeft
+	rightLeft.Parent = node
 
-	return x
+	return right
 }
 
 // RightRotate rotates a node in a binary search tree
-//
-func RightRotate(b *Node) *Node {
-	x := b.LeftChild
-	z := x.RightChild
+func RightRotate(node *Node) *Node {
+	left := node.LeftChild
+	leftRight := left.RightChild
 
-	x.RightChild = b
-	b.Parent = x
+	left.RightChild = node
+	node.Parent = left
 
-	b.LeftChild = z
-	z.Parent = b
+	node.LeftChild = leftRight
+	leftRight.Parent = node
 
-	return x
+	return left
+}
+
+func height(n *Node) int {
+	if n == nil {
+		return 0
+	}
+	return n.Height
+}
+
+func max(x, y int) int {
+	if x > y {
+		return x
+	}
+	return y
 }
