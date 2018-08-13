@@ -1,9 +1,14 @@
 package binarysearchtree
 
+import (
+	"fmt"
+)
+
 // Colors of a node of a red black tree
 const (
-	Black = 0
-	Red   = 1
+	Uncolored = 0
+	Black     = 1
+	Red       = 2
 )
 
 // Cases for binary search tree insertion
@@ -21,14 +26,14 @@ type RedBlackTree struct {
 
 // Insert adds an element to the red black tree
 func (r *RedBlackTree) Insert(e Element) {
-	newNode := &Node{Element: e}
+	newNode := &Node{Element: e, color: Red}
 	r.root = Insert(r.root, newNode)
 
 	r.fixViolation(newNode)
 }
 
 func (r *RedBlackTree) fixViolation(node *Node) {
-	if node == nil || node.color == Black {
+	if node == nil {
 		return
 	}
 	parent := node.Parent
@@ -37,6 +42,13 @@ func (r *RedBlackTree) fixViolation(node *Node) {
 	//
 	if parent == nil {
 		node.color = Black
+		r.root = node
+		return
+	}
+
+	// If node is black, stop recursion
+	//
+	if node.color == Black {
 		return
 	}
 
@@ -56,11 +68,11 @@ func (r *RedBlackTree) fixViolation(node *Node) {
 
 	// Get uncle to determine which case this is
 	//
-	insertCase := Left
+	insertCase := Right
 	uncle := grandParent.LeftChild
 	if parent == grandParent.LeftChild {
 		uncle = grandParent.RightChild
-		insertCase = Right
+		insertCase = Left
 	}
 
 	if uncle == nil || uncle.color == Black {
@@ -72,7 +84,8 @@ func (r *RedBlackTree) fixViolation(node *Node) {
 			}
 			// Case 2: Left left case
 			//
-			RightRotate(grandParent)
+			grandParent.color, parent.color = parent.color, grandParent.color
+			grandParent = RightRotate(grandParent)
 		} else if insertCase == Right {
 			// Case 3: Right left case
 			//
@@ -81,9 +94,9 @@ func (r *RedBlackTree) fixViolation(node *Node) {
 			}
 			// Case 4 Right right case
 			//
-			LeftRotate(grandParent)
+			grandParent.color, parent.color = parent.color, grandParent.color
+			grandParent = LeftRotate(grandParent)
 		}
-		grandParent.color, parent.color = parent.color, grandParent.color
 	} else if uncle.color == Red {
 		// Recolor parent and uncle
 		//
@@ -92,4 +105,35 @@ func (r *RedBlackTree) fixViolation(node *Node) {
 		grandParent.color = Red
 	}
 	r.fixViolation(grandParent)
+}
+
+func (r RedBlackTree) String() string {
+	if r.root == nil {
+		return ""
+	}
+
+	return r.print2d(r.root, 0)
+}
+
+func (r RedBlackTree) print2d(node *Node, spaces int) string {
+	if node == nil {
+		return ""
+	}
+
+	spaces += 10
+	s := "\n"
+	s += r.print2d(node.RightChild, spaces)
+
+	for i := 0; i < spaces; i++ {
+		s += " "
+	}
+	color := "r"
+	if node.color == Black {
+		color = "b"
+	}
+	s += fmt.Sprintf("%d%s\n", node.Value(), color)
+
+	s += r.print2d(node.LeftChild, spaces)
+
+	return s
 }

@@ -1,5 +1,7 @@
 package binarysearchtree
 
+import "fmt"
+
 // Node of a binary search tree
 type Node struct {
 	Element
@@ -10,6 +12,38 @@ type Node struct {
 	Height int
 	// Red Black Tree node properties
 	color int
+}
+
+func (n Node) String() string {
+	s := fmt.Sprint(n.Value(), " ")
+
+	if n.LeftChild != nil {
+		s += fmt.Sprint(n.LeftChild.Value(), " ")
+	} else {
+		s += "<nil> "
+	}
+	if n.RightChild != nil {
+		s += fmt.Sprint(n.RightChild.Value(), " ")
+	} else {
+		s += "<nil> "
+	}
+
+	if n.Parent != nil {
+		s += fmt.Sprint(n.Parent.Value(), " ")
+	} else {
+		s += "<nil> "
+	}
+
+	switch n.color {
+	case Black:
+		s += "Black "
+	case Red:
+		s += "Red "
+	}
+
+	s += fmt.Sprint(n.Height, " ")
+
+	return s
 }
 
 // Element is an element stored in a node of a binary search tree
@@ -135,31 +169,87 @@ func Remove(root *Node, node *Node) (*Node, bool) {
 }
 
 // LeftRotate rotates a node in a binary search tree
-func LeftRotate(node *Node) *Node {
-	right := node.RightChild
-	rightLeft := right.LeftChild
+func LeftRotate(x *Node) *Node {
+	if x == nil {
+		return nil
+	}
 
-	right.LeftChild = node
-	node.Parent = right
+	// Get right Child
+	//
+	if x.RightChild == nil {
+		return nil
+	}
+	xRight := x.RightChild
 
-	node.RightChild = rightLeft
-	rightLeft.Parent = node
+	// Assign parent of x as parent of right child
+	//
+	xParent := x.Parent
+	xRight.Parent = xParent
+	if xParent != nil {
+		if xParent.LeftChild == x {
+			xParent.LeftChild = xRight
+		} else if xParent.RightChild == x {
+			xParent.RightChild = xRight
+		}
+	}
 
-	return right
+	xRightLeft := xRight.LeftChild
+
+	// Set xright as the parent of x
+	//
+	x.Parent = xRight
+	xRight.LeftChild = x
+
+	// Set left child of xright as right child of x
+	//
+	x.RightChild = xRightLeft
+	if xRightLeft != nil {
+		xRightLeft.Parent = x
+	}
+
+	return xRight
 }
 
 // RightRotate rotates a node in a binary search tree
-func RightRotate(node *Node) *Node {
-	left := node.LeftChild
-	leftRight := left.RightChild
+func RightRotate(x *Node) *Node {
+	if x == nil {
+		return nil
+	}
 
-	left.RightChild = node
-	node.Parent = left
+	// Get left Child
+	//
+	if x.LeftChild == nil {
+		return nil
+	}
+	xLeft := x.LeftChild
 
-	node.LeftChild = leftRight
-	leftRight.Parent = node
+	// Assign parent of x as parent of right child
+	//
+	xParent := x.Parent
+	xLeft.Parent = xParent
+	if xParent != nil {
+		if xParent.LeftChild == x {
+			xParent.LeftChild = xLeft
+		} else if xParent.RightChild == x {
+			xParent.RightChild = xLeft
+		}
+	}
 
-	return left
+	xLeftRight := xLeft.RightChild
+
+	// Set xright as the parent of x
+	//
+	x.Parent = xLeft
+	xLeft.RightChild = x
+
+	// Set left child of xright as right child of x
+	//
+	x.LeftChild = xLeftRight
+	if xLeftRight != nil {
+		xLeftRight.Parent = x
+	}
+
+	return xLeft
 }
 
 func height(n *Node) int {
