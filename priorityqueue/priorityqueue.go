@@ -3,6 +3,7 @@ package priorityqueue
 import (
 	"errors"
 	"fmt"
+	"sync"
 )
 
 // Type of heaps
@@ -20,6 +21,7 @@ type Element interface {
 type PriorityQueue struct {
 	elements []Element
 	heapType int
+	sync.Mutex
 }
 
 // NewPriorityQueue creates a new priority queue
@@ -32,6 +34,9 @@ func NewPriorityQueue(heapType int) *PriorityQueue {
 
 // Push inserts an element into the priority queue
 func (p *PriorityQueue) Push(e Element) error {
+	p.Mutex.Lock()
+	defer p.Mutex.Unlock()
+
 	// Insert element into end of queue
 	idx := len(p.elements)
 	p.elements = append(p.elements, e)
@@ -54,6 +59,9 @@ func (p *PriorityQueue) Push(e Element) error {
 
 // Pop removes the last element in the priority queue
 func (p *PriorityQueue) Pop() (Element, error) {
+	p.Mutex.Lock()
+	defer p.Mutex.Unlock()
+
 	if len(p.elements) <= 0 {
 		return nil, errors.New("priority queue is empty")
 	}

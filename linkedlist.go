@@ -1,11 +1,16 @@
 package datastructures
 
+import (
+	"sync"
+)
+
 // LinkedList is a generic list implementation in go lang
 //
 type LinkedList struct {
 	first  *listNode
 	last   *listNode
 	Length int
+	sync.Mutex
 }
 
 type listNode struct {
@@ -17,6 +22,9 @@ type listNode struct {
 // Insert adds a new element in the linked list
 //
 func (l *LinkedList) Insert(val interface{}) {
+	l.Mutex.Lock()
+	defer l.Mutex.Unlock()
+
 	node := &listNode{Value: val}
 
 	if l.first == nil {
@@ -34,6 +42,9 @@ func (l *LinkedList) Insert(val interface{}) {
 // Remove removes a given element in the linked list
 //
 func (l *LinkedList) Remove(val interface{}) bool {
+	l.Mutex.Lock()
+	defer l.Mutex.Unlock()
+
 	// If empty then nothing to remove
 	//
 	if l.first == nil {

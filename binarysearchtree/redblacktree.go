@@ -52,7 +52,6 @@ func (r *RedBlackTree) Remove(e Element) {
 	var brokenNode *Node
 	r.root, brokenNode = Remove(r.root, e)
 
-	fmt.Println(brokenNode)
 	r.fixRemoveViolation(brokenNode)
 }
 
@@ -157,7 +156,6 @@ func (r *RedBlackTree) fixRemoveViolation(node *Node) {
 	}
 	// This should never happen again
 	//
-	fmt.Println("Node:", node, "\t\tSibling:", sibling, "\t\tparent:", parent)
 	if sibling.IsNil {
 		return
 	}
@@ -167,7 +165,6 @@ func (r *RedBlackTree) fixRemoveViolation(node *Node) {
 		//
 		if (sibling.LeftChild.IsNil || sibling.LeftChild.color == Black) &&
 			(sibling.RightChild.IsNil || sibling.RightChild.color == Black) {
-			fmt.Println("Both black case")
 			// Case when both nephews are black
 			//
 			sibling.color = Red
@@ -176,14 +173,12 @@ func (r *RedBlackTree) fixRemoveViolation(node *Node) {
 			}
 		} else if removeCase == Left {
 			if sibling.LeftChild.IsNil || sibling.LeftChild.color == Black {
-				fmt.Println("Left right case")
 				// Left Right Case
 				//
 				sibling.RightChild.color, sibling.color = sibling.color, sibling.RightChild.color
 				sibling = LeftRotate(sibling)
 			}
 
-			fmt.Println("right right case")
 			// Right right case
 			//
 			parent.color, sibling.color = sibling.color, parent.color
@@ -191,14 +186,12 @@ func (r *RedBlackTree) fixRemoveViolation(node *Node) {
 			parent.LeftChild.color = Black
 		} else if removeCase == Right {
 			if sibling.LeftChild.IsNil || sibling.LeftChild.color == Black {
-				fmt.Println("right left case")
 				// Right Left Case
 				//
 				sibling.LeftChild.color, sibling.color = sibling.color, sibling.LeftChild.color
 				sibling = RightRotate(sibling)
 			}
 
-			fmt.Println("right right case")
 			// Right right case
 			//
 			parent.color, sibling.color = sibling.color, parent.color
@@ -211,12 +204,10 @@ func (r *RedBlackTree) fixRemoveViolation(node *Node) {
 		//
 		parent.color, sibling.color = sibling.color, parent.color
 		if removeCase == Left {
-			fmt.Println("left case")
 			// Left case
 			//
 			parent = RightRotate(parent)
 		} else if removeCase == Right {
-			fmt.Println("right case")
 			// Right case
 			//
 			parent = LeftRotate(parent)
