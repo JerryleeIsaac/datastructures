@@ -19,15 +19,14 @@ const (
 
 // RedBlackTree is a kind of balanced binary search tree that satisfies
 // red black property
-//
 type RedBlackTree struct {
 	root *Node
 }
 
 // Insert adds an element to the red black tree
 func (r *RedBlackTree) Insert(e Element) {
-	newNode := &Node{Element: e, color: Red}
-	r.root = Insert(r.root, newNode)
+	var newNode *Node
+	r.root, newNode = Insert(r.root, e)
 
 	r.fixViolation(newNode)
 }
